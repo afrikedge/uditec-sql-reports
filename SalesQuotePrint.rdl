@@ -34,7 +34,10 @@
 		  WHERE LA2.[Document No_] = SQH.No_),0) [Total TVA],
 	ISNULL((SELECT SUM([Amount Including VAT])
 	     FROM [CRONUS France S_A_$Sales Line$437dbf0e-84ff-417a-965d-ed2bb9650972] LA3
-		  WHERE LA3.[Document No_] = SQH.No_),0) [Total TTC]
+		  WHERE LA3.[Document No_] = SQH.No_),0) [Total TTC],
+[dbo].[udf_NombreEnLettres](ISNULL((SELECT SUM([Amount Including VAT])
+	     FROM [CRONUS France S_A_$Sales Line$437dbf0e-84ff-417a-965d-ed2bb9650972] LA3
+		  WHERE LA3.[Document No_] = SQH.No_),0)) [Amount in Letters]
 FROM [dbo].[CRONUS France S_A_$Sales Header$437dbf0e-84ff-417a-965d-ed2bb9650972] SQH
 INNER JOIN [dbo].[CRONUS France S_A_$Salesperson_Purchaser$437dbf0e-84ff-417a-965d-ed2bb9650972] SP ON SQH.[Salesperson Code] = SP.Code
 INNER JOIN [dbo].[CRONUS France S_A_$Responsibility Center$437dbf0e-84ff-417a-965d-ed2bb9650972] RS ON SQH.[Responsibility Center] = RS.Code
@@ -86,6 +89,10 @@ WHERE SQH.[Document Type] = 0 AND SQH.No_ in (@NumeroDevis)</CommandText>
         <Field Name="Total_TTC">
           <DataField>Total TTC</DataField>
           <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="Amount_in_Letters">
+          <DataField>Amount in Letters</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
         </Field>
       </Fields>
     </DataSet>
@@ -148,6 +155,32 @@ WHERE [Document Type] = 0 AND [Document No_] in (@NumeroDevis)</CommandText>
         <Field Name="lineDiscountAmount">
           <DataField>lineDiscountAmount</DataField>
           <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="CompanyInfo_DataSet">
+      <Query>
+        <DataSourceName>DataSource1</DataSourceName>
+        <CommandText>SELECT Name, Address, [Home Page], [Phone No_] 
+FROM [dbo].[CRONUS France S_A_$Company Information$437dbf0e-84ff-417a-965d-ed2bb9650972]</CommandText>
+        <rd:UseGenericDesigner>true</rd:UseGenericDesigner>
+      </Query>
+      <Fields>
+        <Field Name="Name">
+          <DataField>Name</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="Address">
+          <DataField>Address</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="Home_Page">
+          <DataField>Home Page</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="Phone_No_">
+          <DataField>Phone No_</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
         </Field>
       </Fields>
     </DataSet>
@@ -1745,39 +1778,6 @@ WHERE [Document Type] = 0 AND [Document No_] in (@NumeroDevis)</CommandText>
               <PaddingBottom>2pt</PaddingBottom>
             </Style>
           </Textbox>
-          <Textbox Name="Textbox29">
-            <CanGrow>true</CanGrow>
-            <KeepTogether>true</KeepTogether>
-            <Paragraphs>
-              <Paragraph>
-                <TextRuns>
-                  <TextRun>
-                    <Value>=UCase(Code.RupeesToWord(Sum(Fields!Total_TTC.Value, "SalesQuoteHeader"))&amp; " MGA Ariary")</Value>
-                    <Style>
-                      <FontFamily>Arial</FontFamily>
-                      <FontSize>7pt</FontSize>
-                    </Style>
-                  </TextRun>
-                </TextRuns>
-                <Style />
-              </Paragraph>
-            </Paragraphs>
-            <rd:DefaultName>Textbox29</rd:DefaultName>
-            <Top>6.50882cm</Top>
-            <Left>3.08083cm</Left>
-            <Height>0.44125cm</Height>
-            <Width>7.51037cm</Width>
-            <ZIndex>8</ZIndex>
-            <Style>
-              <Border>
-                <Style>None</Style>
-              </Border>
-              <PaddingLeft>2pt</PaddingLeft>
-              <PaddingRight>2pt</PaddingRight>
-              <PaddingTop>2pt</PaddingTop>
-              <PaddingBottom>2pt</PaddingBottom>
-            </Style>
-          </Textbox>
           <Tablix Name="Tablix2">
             <TablixBody>
               <TablixColumns>
@@ -1836,7 +1836,7 @@ WHERE [Document Type] = 0 AND [Document No_] in (@NumeroDevis)</CommandText>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Sum(Fields!Total_HT.Value)</Value>
+                                  <Value>=Fields!Total_HT.Value</Value>
                                   <Style>
                                     <FontSize>7pt</FontSize>
                                     <FontWeight>Bold</FontWeight>
@@ -1913,7 +1913,7 @@ WHERE [Document Type] = 0 AND [Document No_] in (@NumeroDevis)</CommandText>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Sum(Fields!Total_TVA.Value)</Value>
+                                  <Value>=Fields!Total_TVA.Value</Value>
                                   <Style>
                                     <FontFamily>Arial</FontFamily>
                                     <FontSize>7pt</FontSize>
@@ -1991,7 +1991,7 @@ WHERE [Document Type] = 0 AND [Document No_] in (@NumeroDevis)</CommandText>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Sum(Fields!Total_TTC.Value)</Value>
+                                  <Value>=Fields!Total_TTC.Value</Value>
                                   <Style>
                                     <FontFamily>Arial</FontFamily>
                                     <FontSize>7pt</FontSize>
@@ -2041,6 +2041,77 @@ WHERE [Document Type] = 0 AND [Document No_] in (@NumeroDevis)</CommandText>
             <Left>12.14592cm</Left>
             <Height>1.33278cm</Height>
             <Width>5.9207cm</Width>
+            <ZIndex>8</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Tablix>
+          <Tablix Name="Tablix5">
+            <TablixBody>
+              <TablixColumns>
+                <TablixColumn>
+                  <Width>8.73815cm</Width>
+                </TablixColumn>
+              </TablixColumns>
+              <TablixRows>
+                <TablixRow>
+                  <Height>0.44125cm</Height>
+                  <TablixCells>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox13">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=UCase(Fields!Amount_in_Letters.Value) &amp; " MGA Ariary"</Value>
+                                  <Style>
+                                    <FontSize>7pt</FontSize>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Left</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox13</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                  </TablixCells>
+                </TablixRow>
+              </TablixRows>
+            </TablixBody>
+            <TablixColumnHierarchy>
+              <TablixMembers>
+                <TablixMember />
+              </TablixMembers>
+            </TablixColumnHierarchy>
+            <TablixRowHierarchy>
+              <TablixMembers>
+                <TablixMember />
+              </TablixMembers>
+            </TablixRowHierarchy>
+            <DataSetName>SalesQuoteHeader</DataSetName>
+            <Top>6.50882cm</Top>
+            <Left>3.08083cm</Left>
+            <Height>0.44125cm</Height>
+            <Width>8.73815cm</Width>
             <ZIndex>9</ZIndex>
             <Style>
               <Border>
@@ -2120,7 +2191,7 @@ WHERE [Document Type] = 0 AND [Document No_] in (@NumeroDevis)</CommandText>
                 <Paragraph>
                   <TextRuns>
                     <TextRun>
-                      <Value>UNITE DE MAGASINS TECHNOLOGIQUES (UMATEC) SARL</Value>
+                      <Value>=First(Fields!Name.Value, "CompanyInfo_DataSet")</Value>
                       <Style>
                         <FontSize>7pt</FontSize>
                         <FontWeight>Bold</FontWeight>
@@ -2153,7 +2224,7 @@ WHERE [Document Type] = 0 AND [Document No_] in (@NumeroDevis)</CommandText>
                 <Paragraph>
                   <TextRuns>
                     <TextRun>
-                      <Value>LOT FFR 059/III ROUTE DES HYDROCARBURES, ANKORONDRANO</Value>
+                      <Value>=First(Fields!Address.Value, "CompanyInfo_DataSet")</Value>
                       <Style>
                         <FontFamily>Arial</FontFamily>
                         <FontSize>7pt</FontSize>
@@ -2187,7 +2258,7 @@ WHERE [Document Type] = 0 AND [Document No_] in (@NumeroDevis)</CommandText>
                 <Paragraph>
                   <TextRuns>
                     <TextRun>
-                      <Value>www.cosmos.mg</Value>
+                      <Value>=First(Fields!Home_Page.Value, "CompanyInfo_DataSet")</Value>
                       <Style>
                         <FontFamily>Arial</FontFamily>
                         <FontSize>6pt</FontSize>
@@ -2221,7 +2292,7 @@ WHERE [Document Type] = 0 AND [Document No_] in (@NumeroDevis)</CommandText>
                 <Paragraph>
                   <TextRuns>
                     <TextRun>
-                      <Value>034 54 713 93 / 034 53 407 57</Value>
+                      <Value>=First(Fields!Phone_No_.Value, "CompanyInfo_DataSet")</Value>
                       <Style>
                         <FontFamily>Arial</FontFamily>
                         <FontSize>7pt</FontSize>
@@ -2233,9 +2304,9 @@ WHERE [Document Type] = 0 AND [Document No_] in (@NumeroDevis)</CommandText>
                 </Paragraph>
               </Paragraphs>
               <rd:DefaultName>Textbox2</rd:DefaultName>
-              <Top>33.76111mm</Top>
+              <Top>32.70278mm</Top>
               <Left>13.23611mm</Left>
-              <Height>4.4125mm</Height>
+              <Height>4.05972mm</Height>
               <Width>36.81805mm</Width>
               <ZIndex>5</ZIndex>
               <Style>
