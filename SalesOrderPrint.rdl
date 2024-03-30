@@ -2,102 +2,26 @@
 <Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2016/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
   <AutoRefresh>0</AutoRefresh>
   <DataSources>
-    <DataSource Name="UditecBC">
+    <DataSource Name="DataSource">
       <DataSourceReference>/Uditec-bc</DataSourceReference>
-      <rd:SecurityType>None</rd:SecurityType>
-      <rd:DataSourceID>5fcce24d-6f7f-4920-851c-cc2f2ed53c75</rd:DataSourceID>
+      <rd:SecurityType>Integrated</rd:SecurityType>
+      <rd:DataSourceID>5ec9a793-7dad-4066-ae55-3c842e134468</rd:DataSourceID>
     </DataSource>
   </DataSources>
   <DataSets>
-    <DataSet Name="Lines">
-      <Query>
-        <DataSourceName>UditecBC</DataSourceName>
-        <QueryParameters>
-          <QueryParameter Name="@Quote">
-            <Value>=Parameters!Quote.Value</Value>
-          </QueryParameter>
-        </QueryParameters>
-        <CommandText>SELECT No_,
-           [Document No_],
-            [Description],
-	ISNULL(Quantity, 0) Quantity,
-	ISNULL([Unit Price], 0) UnitPrice,
-	ISNULL([Line Discount _], 0) lineDiscount,
-	ISNULL([Line Discount Amount], 0) lineDiscountAmount
-FROM [dbo].[UDT$Sales Line$437dbf0e-84ff-417a-965d-ed2bb9650972]
-WHERE [Document Type] = 0 AND [Document No_] in (@Quote)</CommandText>
-        <rd:UseGenericDesigner>true</rd:UseGenericDesigner>
-      </Query>
-      <Fields>
-        <Field Name="No_">
-          <DataField>No_</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="Document_No_">
-          <DataField>Document No_</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="Description">
-          <DataField>Description</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="Quantity">
-          <DataField>Quantity</DataField>
-          <rd:TypeName>System.Decimal</rd:TypeName>
-        </Field>
-        <Field Name="UnitPrice">
-          <DataField>UnitPrice</DataField>
-          <rd:TypeName>System.Decimal</rd:TypeName>
-        </Field>
-        <Field Name="lineDiscount">
-          <DataField>lineDiscount</DataField>
-          <rd:TypeName>System.Decimal</rd:TypeName>
-        </Field>
-        <Field Name="lineDiscountAmount">
-          <DataField>lineDiscountAmount</DataField>
-          <rd:TypeName>System.Decimal</rd:TypeName>
-        </Field>
-      </Fields>
-    </DataSet>
-    <DataSet Name="CompanyInfo">
-      <Query>
-        <DataSourceName>UditecBC</DataSourceName>
-        <CommandText>SELECT Name, Address, [Home Page], [Phone No_] 
-FROM [dbo].[UDT$Company Information$437dbf0e-84ff-417a-965d-ed2bb9650972]</CommandText>
-        <rd:UseGenericDesigner>true</rd:UseGenericDesigner>
-      </Query>
-      <Fields>
-        <Field Name="Name">
-          <DataField>Name</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="Address">
-          <DataField>Address</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="Home_Page">
-          <DataField>Home Page</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="Phone_No_">
-          <DataField>Phone No_</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-      </Fields>
-    </DataSet>
     <DataSet Name="Header">
       <Query>
-        <DataSourceName>UditecBC</DataSourceName>
+        <DataSourceName>DataSource</DataSourceName>
         <QueryParameters>
-          <QueryParameter Name="@Quote">
-            <Value>=Parameters!Quote.Value</Value>
+          <QueryParameter Name="@Order">
+            <Value>=Parameters!Order.Value</Value>
           </QueryParameter>
         </QueryParameters>
         <CommandText>SELECT SQH.No_, 
-              SQH.[Order Date],
+    SQH.[Order Date],
 	SP.Name [Nom vendeur],
 	RS.Name [Nom unité],
-               RS.Address [Adresse],
+    RS.Address [Adresse],
 	RS.City [Ville],
 	RS.[Post Code] CodePostal,
 	CASE ISNULL(C.Name, '') WHEN '' THEN SQH.[Sell-to Customer Name] ELSE C.Name END NomClient,
@@ -105,21 +29,21 @@ FROM [dbo].[UDT$Company Information$437dbf0e-84ff-417a-965d-ed2bb9650972]</Comma
 	CASE ISNULL(C.[Phone No_], '') WHEN '' THEN SQH.[Sell-to Phone No_] ELSE C.[Phone No_] END Telephone,
 	ISNULL((SELECT SUM([Line Amount]) 
 	     FROM [dbo].[UDT$Sales Line$437dbf0e-84ff-417a-965d-ed2bb9650972] LA
-		  WHERE LA.[Document No_] = SQH.No_ AND [Document Type] = 0), 0) [Total HT],
+		  WHERE LA.[Document No_] = SQH.No_ AND [Document Type] = 1), 0) [Total HT],
 	ISNULL((SELECT SUM([Amount Including VAT]) - SUM([Line Amount])
 	     FROM [dbo].[UDT$Sales Line$437dbf0e-84ff-417a-965d-ed2bb9650972] LA2
-		  WHERE LA2.[Document No_] = SQH.No_ AND [Document Type] = 0),0) [Total TVA],
+		  WHERE LA2.[Document No_] = SQH.No_ AND [Document Type] = 1),0) [Total TVA],
 	ISNULL((SELECT SUM([Amount Including VAT])
 	     FROM [dbo].[UDT$Sales Line$437dbf0e-84ff-417a-965d-ed2bb9650972] LA3
-		  WHERE LA3.[Document No_] = SQH.No_ AND [Document Type] = 0),0) [Total TTC],
+		  WHERE LA3.[Document No_] = SQH.No_ AND [Document Type] = 1),0) [Total TTC],
 	[dbo].[udf_NombreEnLettres](ISNULL((SELECT SUM([Amount Including VAT])
 	     FROM [dbo].[UDT$Sales Line$437dbf0e-84ff-417a-965d-ed2bb9650972] LA4
 		  WHERE LA4.[Document No_] = SQH.No_),0)) [Amount in Letters]
 FROM [dbo].[UDT$Sales Header$437dbf0e-84ff-417a-965d-ed2bb9650972] SQH
 LEFT JOIN [dbo].[UDT$Salesperson_Purchaser$437dbf0e-84ff-417a-965d-ed2bb9650972] SP ON SQH.[Salesperson Code] = SP.Code
 LEFT JOIN [dbo].[UDT$Responsibility Center$437dbf0e-84ff-417a-965d-ed2bb9650972] RS ON SQH.[Responsibility Center] = RS.Code
-left JOIN [dbo].[UDT$Contact$437dbf0e-84ff-417a-965d-ed2bb9650972] C ON SQH.[Sell-to Contact No_] = C.No_ 
-WHERE SQH.[Document Type] = 0 AND SQH.No_ in (@Quote)</CommandText>
+LEFT JOIN [dbo].[UDT$Contact$437dbf0e-84ff-417a-965d-ed2bb9650972] C ON SQH.[Sell-to Contact No_] = C.No_ 
+WHERE SQH.[Document Type] = 1 AND SQH.No_ in (@Order)</CommandText>
         <rd:UseGenericDesigner>true</rd:UseGenericDesigner>
       </Query>
       <Fields>
@@ -139,12 +63,12 @@ WHERE SQH.[Document Type] = 0 AND SQH.No_ in (@Quote)</CommandText>
           <DataField>Nom unité</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
-        <Field Name="Adresse">
-          <DataField>Adresse</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
         <Field Name="Ville">
           <DataField>Ville</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="Adresse">
+          <DataField>Adresse</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
         <Field Name="CodePostal">
@@ -181,12 +105,23 @@ WHERE SQH.[Document Type] = 0 AND SQH.No_ in (@Quote)</CommandText>
         </Field>
       </Fields>
     </DataSet>
-    <DataSet Name="Quote">
+    <DataSet Name="Lines">
       <Query>
-        <DataSourceName>UditecBC</DataSourceName>
-        <CommandText>SELECT  DISTINCT No_, No_ as NuméroDevis
-FROM [dbo].[UDT$Sales Header$437dbf0e-84ff-417a-965d-ed2bb9650972]
-WHERE [Document Type] = 0</CommandText>
+        <DataSourceName>DataSource</DataSourceName>
+        <QueryParameters>
+          <QueryParameter Name="@Order">
+            <Value>=Parameters!Order.Value</Value>
+          </QueryParameter>
+        </QueryParameters>
+        <CommandText>SELECT No_,
+           [Document No_],
+            [Description],
+	ISNULL(Quantity, 0) Quantity,
+	ISNULL([Unit Price], 0) UnitPrice,
+	ISNULL([Line Discount _], 0) lineDiscount,
+	ISNULL([Line Discount Amount], 0) lineDiscountAmount
+FROM [dbo].[UDT$Sales Line$437dbf0e-84ff-417a-965d-ed2bb9650972]
+WHERE [Document Type] = 1 AND [Document No_] in (@Order)</CommandText>
         <rd:UseGenericDesigner>true</rd:UseGenericDesigner>
       </Query>
       <Fields>
@@ -194,8 +129,73 @@ WHERE [Document Type] = 0</CommandText>
           <DataField>No_</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
-        <Field Name="NuméroDevis">
-          <DataField>NuméroDevis</DataField>
+        <Field Name="Document_No_">
+          <DataField>Document No_</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="Description">
+          <DataField>Description</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="Quantity">
+          <DataField>Quantity</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="UnitPrice">
+          <DataField>UnitPrice</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="lineDiscount">
+          <DataField>lineDiscount</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="lineDiscountAmount">
+          <DataField>lineDiscountAmount</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="CompanyInfo">
+      <Query>
+        <DataSourceName>DataSource</DataSourceName>
+        <CommandText>SELECT Name, Address, [Home Page], [Phone No_] 
+FROM [dbo].[UDT$Company Information$437dbf0e-84ff-417a-965d-ed2bb9650972]</CommandText>
+        <rd:UseGenericDesigner>true</rd:UseGenericDesigner>
+      </Query>
+      <Fields>
+        <Field Name="Name">
+          <DataField>Name</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="Address">
+          <DataField>Address</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="Home_Page">
+          <DataField>Home Page</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="Phone_No_">
+          <DataField>Phone No_</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="Order">
+      <Query>
+        <DataSourceName>DataSource</DataSourceName>
+        <CommandText>SELECT  DISTINCT No_, No_ as NuméroCmde
+FROM [dbo].[UDT$Sales Header$437dbf0e-84ff-417a-965d-ed2bb9650972]
+WHERE [Document Type] = 1</CommandText>
+        <rd:UseGenericDesigner>true</rd:UseGenericDesigner>
+      </Query>
+      <Fields>
+        <Field Name="No_">
+          <DataField>No_</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="NuméroCmde">
+          <DataField>NuméroCmde</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
       </Fields>
@@ -1466,7 +1466,7 @@ WHERE [Document Type] = 0</CommandText>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>Numéro devis :</Value>
+                                  <Value>Numéro commande :</Value>
                                   <Style>
                                     <FontSize>8pt</FontSize>
                                   </Style>
@@ -3025,7 +3025,7 @@ WHERE [Document Type] = 0</CommandText>
                         <TextRun>
                           <Value>=First(Fields!Adresse.Value, "Header")</Value>
                           <Style>
-                            <FontSize>7pt</FontSize>
+                            <FontSize>8pt</FontSize>
                           </Style>
                         </TextRun>
                       </TextRuns>
@@ -3218,7 +3218,7 @@ WHERE [Document Type] = 0</CommandText>
     </ReportSection>
   </ReportSections>
   <ReportParameters>
-    <ReportParameter Name="Quote">
+    <ReportParameter Name="Order">
       <DataType>String</DataType>
       <Prompt>No proforma</Prompt>
     </ReportParameter>
@@ -3231,7 +3231,7 @@ WHERE [Document Type] = 0</CommandText>
         <CellDefinition>
           <ColumnIndex>0</ColumnIndex>
           <RowIndex>0</RowIndex>
-          <ParameterName>Quote</ParameterName>
+          <ParameterName>Order</ParameterName>
         </CellDefinition>
       </CellDefinitions>
     </GridLayoutDefinition>
